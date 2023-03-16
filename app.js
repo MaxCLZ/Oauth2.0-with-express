@@ -4,10 +4,11 @@ const OAuth2Server = require('oauth2-server');
 
 const app = express();
 
+
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
-const PORT = 4001;
+const PORT = 4001
 
 const oauth = new OAuth2Server({
   model: require("./model"),
@@ -15,16 +16,16 @@ const oauth = new OAuth2Server({
 })
 
 const authenticateRequest = (req, res, next) => {
- 
+
   let request = new OAuth2Server.Request(req);
-  let response = new OAuth2Server.Response(res);
- 
+  let response = new OAuth2Server.Response(res)
+
   return oauth.authenticate(request, response)
-    .then(()=>{
-      next();
+    .then((token)=>{
+      next()
     })
     .catch((err) => {
-      res.send('You are not allowed')
+      res.sendFile(path.join(__dirname, 'public/error.html'))
     })
 }
 
@@ -50,8 +51,12 @@ app.get('/login', (req, res)=>{
     res.sendFile(path.join(__dirname, 'public/login.html'));
 })
 
+app.get('/public', (req, res)=>{
+    res.sendFile(path.join(__dirname, 'public/allowed.html'));
+})
+
 app.get('/secret', authenticateRequest, (req, res)=>{
-    res.send('Welcome to the secret area.');
+    res.sendFile(path.join(__dirname, 'public/private.html'));
 })
 
 app.listen(PORT, ()=>console.log(`Listening on port ${PORT}`));
